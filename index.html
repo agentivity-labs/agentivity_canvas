@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentivity Canvas</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #161616;
+      --surface:     #1e1e22;
+      --surface2:    #26262c;
+      --border:      #3a3a44;
+      --text:        #e8e8ef;
+      --text2:       #888895;
+      --accent:      #8B61FF;
+      --accent-dim:  rgba(139,97,255,0.15);
+      --accent-glow: rgba(139,97,255,0.3);
+      --radius:      8px;
+      --header-h:    56px;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────────── */
+
+    header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.3px;
+      color: var(--text);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), #4DD0E1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; fill: white; }
+
+    .divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+    /* Team selector */
+    .team-selector {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex: 1;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .team-selector::-webkit-scrollbar { display: none; }
+
+    .team-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .team-btn:hover { border-color: var(--accent); color: var(--text); }
+    .team-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--text); }
+
+    /* Fit button */
+    .fit-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .fit-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    /* Simulate button */
+    .sim-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .sim-btn:hover  { border-color: var(--accent); color: var(--text); }
+    .sim-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── Main layout ─────────────────────────────────────────────────────── */
+
+    main {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+
+    .sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section { display: flex; flex-direction: column; gap: 6px; }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text2);
+    }
+
+    .team-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .orch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-glow);
+      color: #c4a8ff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+
+    .team-goal {
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .team-desc {
+      font-size: 11.5px;
+      color: var(--text2);
+      line-height: 1.55;
+      border-left: 2px solid var(--border);
+      padding-left: 10px;
+    }
+
+    .member-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .member-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: border-color 0.15s;
+    }
+    .member-item:hover { border-color: var(--accent-glow); }
+
+    .member-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .member-info { flex: 1; min-width: 0; }
+
+    .member-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .member-slot {
+      font-size: 10px;
+      color: var(--text2);
+    }
+
+    .member-entry-star {
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    /* ── Canvas area ──────────────────────────────────────────────────────── */
+
+    .canvas-wrap {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ── Light theme overrides ────────────────────────────────────────────── */
+
+    body.light {
+      --bg:          #f4f4f5;
+      --surface:     #ffffff;
+      --surface2:    #f0f0f3;
+      --border:      #dddde8;
+      --text:        #1a1a1f;
+      --text2:       #60607a;
+      --accent:      #6B41DF;
+      --accent-dim:  rgba(107,65,223,0.08);
+      --accent-glow: rgba(107,65,223,0.25);
+    }
+    body.light .orch-badge { color: #5B35CC; }
+
+    /* ── Loading state ───────────────────────────────────────────────────── */
+    .loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text2);
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .loading.hidden { display: none; }
+
+    /* Scrollbar styling */
+    .sidebar { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+    /* ── Instructions overlay ─────────────────────────────────────────────── */
+    .hint {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text2);
+      line-height: 1.6;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    .hint span { display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="#">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      Agentivity Canvas
+    </a>
+    <div class="divider"></div>
+    <div class="team-selector" id="teamSelector"></div>
+    <button class="fit-btn" id="fitBtn" title="Fit to screen">⊡ Fit</button>    <button class="sim-btn" id="simBtn">▶ Simulate</button>    <button class="theme-toggle" id="themeToggle">☀ Light</button>
+  </header>
+
+  <main>
+    <aside class="sidebar" id="sidebar">
+      <div class="loading" id="sidebarLoading">Loading…</div>
+    </aside>
+
+    <div class="canvas-wrap">
+      <canvas id="canvas"></canvas>
+      <div class="loading hidden" id="canvasLoading">Loading…</div>
+      <div class="hint">
+        <span>🖱 Drag to pan</span>
+        <span>⚲ Scroll to zoom</span>
+        <span>📱 Pinch to zoom</span>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { AgentivityTeamCanvas, DARK_THEME, LIGHT_THEME, ORCHESTRATOR_META } from './agentivity-canvas-team.js';
+
+    // ── Team manifest ──────────────────────────────────────────────────────
+    const TEAMS = [
+      { id: '9a565226-322d-43fc-b6e7-55350010000e', label: 'Customer Support Triage' },
+      { id: 'd16a84b5-7b80-4d93-bff3-6c980f248296', label: 'Content Pipeline' },
+      { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567810', label: 'Due Diligence' },
+      { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567811', label: 'Product Brainstorm' },
+      { id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567812', label: 'Campaign Planning' },
+    ];
+
+    const MEMBER_COLORS = {
+      dark:  { agent: '#8B61FF', team: '#4DD0E1', workflow: '#58D38C' },
+      light: { agent: '#6B41DF', team: '#1565C0', workflow: '#2E7D32' },
+    };
+
+    // ── Canvas setup ───────────────────────────────────────────────────────
+    const canvasEl = document.getElementById('canvas');
+    const wrap = canvasEl.parentElement;
+
+    function resizeCanvas() {
+      canvasEl.width  = wrap.clientWidth  * window.devicePixelRatio;
+      canvasEl.height = wrap.clientHeight * window.devicePixelRatio;
+      canvasEl.style.width  = wrap.clientWidth  + 'px';
+      canvasEl.style.height = wrap.clientHeight + 'px';
+      renderer.fitViewport();
+    }
+
+    let isDark = true;
+    const renderer = new AgentivityTeamCanvas(canvasEl, { theme: DARK_THEME });
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // ── Team buttons ──────────────────────────────────────────────────────
+    const selector = document.getElementById('teamSelector');
+    TEAMS.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'team-btn';
+      btn.textContent = t.label;
+      btn.dataset.id = t.id;
+      btn.addEventListener('click', () => loadTeam(t.id));
+      selector.appendChild(btn);
+    });
+
+    // ── Load team ─────────────────────────────────────────────────────────
+    let currentTeamId = null;
+
+    async function loadTeam(id) {
+      if (id === currentTeamId) return;
+      currentTeamId = id;
+
+      // Update active button
+      document.querySelectorAll('.team-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.id === id);
+      });
+
+      const res = await fetch(`data/${id}.json`);
+      const raw = await res.json();
+
+      renderer.loadData(raw);
+      renderSidebar(raw);
+    }
+
+    // ── Sidebar ───────────────────────────────────────────────────────────
+    function normalizeRaw(raw) {
+      if (typeof raw.entryJson === 'string') return { team: JSON.parse(raw.entryJson), agents: {} };
+      return { team: raw.team, agents: raw.agents ?? {} };
+    }
+
+    function renderSidebar(raw) {
+      const { team, agents } = normalizeRaw(raw);
+      const meta = ORCHESTRATOR_META[team.orchestratorId]
+        ?? { label: team.orchestratorId, icon: '◈' };
+      const colors = isDark ? MEMBER_COLORS.dark : MEMBER_COLORS.light;
+
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = `
+        <div class="sidebar-section">
+          <div class="sidebar-label">Team</div>
+          <div class="team-name">${esc(team.name)}</div>
+          <div class="orch-badge">
+            <span>${meta.icon}</span>
+            <span>${meta.label}</span>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Goal</div>
+          <div class="team-goal">${esc(team.goal)}</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Description</div>
+          <div class="team-desc">${esc(team.description)}</div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Members (${team.members.length})</div>
+          <div class="member-list">
+            ${team.members.map(m => {
+              const agentName = m.displayName ?? agents[m.memberEntityId]?.name ?? m.slotId;
+              const color = colors[m.memberType] ?? colors.agent;
+              const isEntry = m.slotId === team.entryPointMemberId;
+              return `<div class="member-item">
+                <div class="member-dot" style="background:${color}"></div>
+                <div class="member-info">
+                  <div class="member-name">${esc(agentName)}</div>
+                  <div class="member-slot">${esc(m.slotId)} · ${esc(m.memberType)}</div>
+                </div>
+                ${isEntry ? '<span class="member-entry-star" title="Entry point">★</span>' : ''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function esc(s) {
+      return String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ── Theme toggle ──────────────────────────────────────────────────────
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      isDark = !isDark;
+      document.body.classList.toggle('light', !isDark);
+      renderer.setTheme(isDark ? DARK_THEME : LIGHT_THEME);
+      document.getElementById('themeToggle').textContent = isDark ? '☀ Light' : '☾ Dark';
+      // Re-render sidebar with updated colors
+      if (currentTeamId) {
+        fetch(`data/${currentTeamId}.json`)
+          .then(r => r.json())
+          .then(renderSidebar);
+      }
+    });
+
+    // ── Simulate button ────────────────────────────────────────────────
+    const simBtn = document.getElementById('simBtn');
+    simBtn.addEventListener('click', () => {
+      renderer.simulate = !renderer.simulate;
+      simBtn.classList.toggle('active', renderer.simulate);
+      simBtn.textContent = renderer.simulate ? '⏸ Simulate' : '▶ Simulate';
+    });
+
+    // ── Fit button ────────────────────────────────────────────────────────
+    document.getElementById('fitBtn').addEventListener('click', () => {
+      renderer.fitViewport();
+    });
+
+    // ── Initial load ──────────────────────────────────────────────────────
+    loadTeam(TEAMS[0].id);
+  </script>
+</body>
+</html>
